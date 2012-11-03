@@ -1,0 +1,32 @@
+{
+  "name": "ajax-localstorage-cache",
+  "title": "Ajax Localstorage Cache",
+  "description": "Cache your ajax responses in localStorage",
+  "version": "0.1.0",
+  "homepage": "https://github.com/treasonx/jquery-ajax-localstorage-cache",
+  "author": {
+    "name": "Paul Irish",
+    "email": "treasonx@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/treasonx/jquery-ajax-localstorage-cache.git"
+  },
+  "bugs": {
+    "url": "https://github.com/treasonx/jquery-ajax-localstorage-cache/issues"
+  },
+  "licenses": [
+    {
+      "type": "Apache",
+      "url": "https://github.com/treasonx/jquery-ajax-localstorage-cache/blob/master/LICENSE-Apache"
+    },
+    {
+      "type": "2",
+      "url": "https://github.com/treasonx/jquery-ajax-localstorage-cache/blob/master/LICENSE-2"
+    }
+  ],
+  "dependencies": {
+    "jquery": "*"
+  },
+  "keywords": []
+}
