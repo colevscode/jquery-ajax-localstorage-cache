@@ -21,8 +21,11 @@ module.exports = function(grunt) {
       dist: {
         src: ['dist/<%= pkg.name %>.js'],
         dest: '.',
-        wrapper: ['(function() {var md5; var define = function(i){md5=i;}; defined.amd=true;\n', '\n}());']
+        wrapper: ['(function() {var md5; var define = function(f){md5=f();}; define.amd=true;\n', '\n}());']
       }
+    },
+    clean: {
+      dist: ['dist/'] 
     },
     min: {
       dist: {
@@ -63,8 +66,9 @@ module.exports = function(grunt) {
   });
   
   grunt.loadNpmTasks('grunt-wrap');
+  grunt.loadNpmTasks('grunt-contrib-clean');
   // Default task.
-  grunt.registerTask('default', 'lint qunit concat wrap min');
-  grunt.registerTask('test', 'lint concat wrap qunit');
+  grunt.registerTask('default', 'clean lint qunit concat wrap min');
+  grunt.registerTask('test', 'clean lint concat wrap qunit');
 
 };
