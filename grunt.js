@@ -48,7 +48,8 @@ module.exports = function(grunt) {
         browser: true
       },
       globals: {
-        jQuery: true
+        jQuery: true,
+        md5: true
       }
     },
     uglify: {}
