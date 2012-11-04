@@ -10,10 +10,10 @@
   function savePayload(fingerprint, payload, hourstl, onError) {
     var expires = +new Date() + 1000 * 60 * 60 * hourstl;
     try {
-      localStorage.setItem( PREFIX+fingerprint, {
+      localStorage.setItem( PREFIX+fingerprint, JSON.stringify({
         t: expires,
         p:payload
-      });
+      }));
     } catch (e) {
       // Remove any incomplete data that may have been saved before the exception was caught
       localStorage.removeItem( fingerprint);
@@ -42,8 +42,11 @@
 
   function getItem(key) {
     var item = localStorage.getItem(PREFIX+key);
+    if(item) {
+      item = JSON.parse(item);
+    }
     if ( item && item.t < +new Date() ){
-      localStorage.removeItem( key );
+      localStorage.removeItem( PREFIX+key );
     }
     return item != null ? item.p : undefined;
   }
@@ -73,9 +76,9 @@
     if ( value ){
       //In the cache? So get it, apply success callback & abort the XHR request
       // parse back to JSON if we can.
-      if ( options.dataType.indexOf( 'json' ) === 0 ) {
-        value = JSON.parse( value );
-      }
+      //if ( options.dataType.indexOf( 'json' ) === 0 ) {
+      //  value = JSON.parse( value );
+      //}
       options.success( value );
       // Abort is broken on JQ 1.5 :(
       jqXHR.abort();
