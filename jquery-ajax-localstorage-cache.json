@@ -1,0 +1,28 @@
+{
+  "name": "jquery-ajax-localstorage-cache",
+  "title": "jquery-ajax-localstorage-cache is a plugin build for jQuery (>1.5.1)",
+  "description": "jquery-ajax-localstorage-cache is a plugin build for jQuery (>1.5.1)",
+  "version": "0.1.0",
+  "homepage": "https://github.com/nectify/jquery-ajax-jstorage-cache",
+  "author": {
+    "name": "Paul Irish",
+    "email": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nectify/jquery-ajax-jstorage-cache.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nectify/jquery-ajax-jstorage-cache/issues"
+  },
+  "licenses": [
+    {
+      "type": "Apache 2",
+      "url": "http://httpd.apache.org/docs/2.2/"
+    }
+  ],
+  "dependencies": {
+    "jquery": ">1.5.1"
+  },
+  "keywords": []
+}
