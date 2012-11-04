@@ -3,7 +3,7 @@ module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
-    pkg: '<json:ajax-localstorage-cache.jquery.json>',
+    pkg: '<json:jquery-ajax-localstorage-cache.json>',
     meta: {
       banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
         '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
@@ -13,8 +13,15 @@ module.exports = function(grunt) {
     },
     concat: {
       dist: {
-        src: ['<banner:meta.banner>', '<file_strip_banner:src/<%= pkg.name %>.js>'],
+        src: ['<banner:meta.banner>', 'libs/md5.js', '<file_strip_banner:src/<%= pkg.name %>.js>'],
         dest: 'dist/<%= pkg.name %>.js'
+      }
+    },
+    wrap: {
+      dist: {
+        src: ['dist/<%= pkg.name %>.js'],
+        dest: '.',
+        wrapper: ['(function() {var md5; var define = function(i){md5=i;}; defined.amd=true;\n', '\n}());']
       }
     },
     min: {
@@ -54,8 +61,10 @@ module.exports = function(grunt) {
     },
     uglify: {}
   });
-
+  
+  grunt.loadNpmTasks('grunt-wrap');
   // Default task.
-  grunt.registerTask('default', 'lint qunit concat min');
+  grunt.registerTask('default', 'lint qunit concat wrap min');
+  grunt.registerTask('test', 'lint concat wrap qunit');
 
 };
