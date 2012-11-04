@@ -2,7 +2,7 @@
 // dependent on Modernizr's localStorage test
 //
 
-(function(window, $, md5, Modernizr, undefined) {
+(function(window, $, Modernizr, undefined) {
 
   var PREFIX = '_jalc_';
 
@@ -107,4 +107,4 @@
     }
   });
   
-} (this, this.jQuery, this.Modernizr, md5));
+} (this, this.jQuery, this.Modernizr));
