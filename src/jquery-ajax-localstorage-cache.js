@@ -47,6 +47,7 @@
     }
     if ( item && item.t < +new Date() ){
       localStorage.removeItem( PREFIX+key );
+      item = null;
     }
     return item != null ? item.p : undefined;
   }
@@ -75,10 +76,11 @@
     var value = getItem( cacheKey );
     if ( value ){
       //In the cache? So get it, apply success callback & abort the XHR request
-      // parse back to JSON if we can.
-      //if ( options.dataType.indexOf( 'json' ) === 0 ) {
-      //  value = JSON.parse( value );
-      //}
+      // parse back to JSON string if we can.
+      if (options.dataType.indexOf( 'json' ) !== 0 ) {
+        value = JSON.stringify( value );
+      } 
+      
       options.success( value );
       // Abort is broken on JQ 1.5 :(
       jqXHR.abort();
