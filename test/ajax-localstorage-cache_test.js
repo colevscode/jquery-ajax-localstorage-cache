@@ -21,37 +21,100 @@
       notStrictEqual(actual, expected, [message])
       raises(block, [expected], [message])
   */
+  var called = 0;
 
-  module('jQuery#awesome', {
+  $.ajaxTransport('json', function( ) {
+    return {
+      send: function( headers, completeCallback ) {
+        completeCallback(200, 'OK', {json: {boo:"yea"}});
+        called++;
+      },
+      abort: function(){}
+    };
+  }); 
+
+  module('ajax cache', {
     setup: function() {
-      this.elems = $('#qunit-fixture').children();
+      window.localStorage.clear();
+      called = 0;
+      $.ajaxSetup({
+        type: 'GET',
+        dataType: 'json',
+        //Caches everything in localStorage ftw!
+        localCache: true
+      });
     }
   });
 
-  test('is chainable', 1, function() {
-    // Not a bad test to run on collection methods.
-    strictEqual(this.elems.awesome(), this.elems, 'should be chaninable');
-  });
+  asyncTest('calls ajax only once', 1, function() {
+    var success = 0;
 
-  test('is awesome', 1, function() {
-    strictEqual(this.elems.awesome().text(), 'awesomeawesomeawesome', 'should be thoroughly awesome');
-  });
-
-  module('jQuery.awesome');
-
-  test('is awesome', 1, function() {
-    strictEqual($.awesome(), 'awesome', 'should be thoroughly awesome');
-  });
-
-  module(':awesome selector', {
-    setup: function() {
-      this.elems = $('#qunit-fixture').children();
+    function onSuccess() {
+      success++;
+      if(success === 2) {
+        equal(called, 1, 'should only make one ajax call');
+        start();
+      }
     }
+
+    $.ajax({
+      url: 'http://example.com/',
+      success: onSuccess
+    });
+    $.ajax({
+      url: 'http://example.com/',
+      success: onSuccess
+    });
+
   });
 
-  test('is awesome', 1, function() {
-    // Use deepEqual & .get() when comparing jQuery objects.
-    deepEqual(this.elems.filter(':awesome').get(), this.elems.last().get(), 'knows awesome when it sees it');
+  asyncTest('should expire items', 1, function() {
+    var success = 0;
+
+    function onSuccess() {
+      success++;
+      if(success === 3) {
+        equal(called, 2, 'should only make one ajax call');
+        start();
+      }
+    }
+
+    $.ajax({
+      url: 'http://example.com/',
+      success: onSuccess
+    });
+    $.ajax({
+      url: 'http://example.com/',
+      success: onSuccess
+    });
+    date = Date;
+    Date = function() {
+      var d = new date();
+      d.setHours(d.getHours()+10);
+      return d;
+    };
+    $.ajax({
+      url: 'http://example.com/',
+      success: onSuccess
+    });
+    Date = date;
+
   });
+
+  test('should not throw when full', 1, function() {
+    
+    equal(1, 1, 'should be chaninable');
+  });
+
+  test('should convert legacy cache items', 1, function() {
+    
+    equal(1, 1, 'should be chaninable');
+  });
+
+  test('should use cachekey option', 1, function() {
+    
+    equal(1, 1, 'should be chaninable');
+  });
+
 
 }(jQuery));
