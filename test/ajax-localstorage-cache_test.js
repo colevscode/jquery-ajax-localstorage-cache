@@ -26,12 +26,23 @@
   $.ajaxTransport('json', function( ) {
     return {
       send: function( headers, completeCallback ) {
-        completeCallback(200, 'OK', {json: {boo:"yea"}});
         called++;
+        completeCallback(200, 'OK', {json: {boo:"yea"}});
       },
       abort: function(){}
     };
   }); 
+
+  function doAjax(onSuccess, thisMany, cacheKey, isCacheValid) {
+    while(thisMany--) { 
+      $.ajax({
+        url: 'http://example.com/',
+        success: onSuccess,
+        cacheKey: cacheKey,
+        isCacheValid: isCacheValid
+      });
+    }
+  }
 
   module('ajax cache', {
     setup: function() {
@@ -56,64 +67,82 @@
         start();
       }
     }
-
-    $.ajax({
-      url: 'http://example.com/',
-      success: onSuccess
-    });
-    $.ajax({
-      url: 'http://example.com/',
-      success: onSuccess
-    });
-
+    
+    doAjax(onSuccess, 2);
   });
 
   asyncTest('should expire items', 1, function() {
     var success = 0;
+    var date = Date;
 
     function onSuccess() {
       success++;
       if(success === 3) {
+        Date = date;
         equal(called, 2, 'should only make one ajax call');
         start();
       }
     }
-
-    $.ajax({
-      url: 'http://example.com/',
-      success: onSuccess
-    });
-    $.ajax({
-      url: 'http://example.com/',
-      success: onSuccess
-    });
-    date = Date;
+    
+    doAjax(onSuccess, 2);
     Date = function() {
       var d = new date();
       d.setHours(d.getHours()+10);
       return d;
     };
-    $.ajax({
-      url: 'http://example.com/',
-      success: onSuccess
-    });
-    Date = date;
+    doAjax(onSuccess, 1);
 
   });
 
-  test('should not throw when full', 1, function() {
-    
-    equal(1, 1, 'should be chaninable');
+  asyncTest('should convert legacy cache items', 4, function() {
+    var testData = {legacy: 'item'};
+    localStorage.setItem('http://example.com/GETundefinedcachettl', new Date().getTime()+1000*60);
+    localStorage.setItem('http://example.com/GETundefined', JSON.stringify(testData)); 
+    doAjax(function(d) {
+      var ttl, value;
+      ttl = localStorage.getItem('http://example.com/GETundefinedcachettl');
+      value = localStorage.getItem('http://example.com/GETundefined');
+
+      deepEqual(d, testData, 'should get legacy data');
+      equal(called, 0, 'should not make call on legacy conversion');
+      
+      equal(ttl, undefined, 'legacy ttl should be removed');
+      equal(value, undefined, 'legacy data should be removed');
+
+      start();
+    }, 1);
   });
 
-  test('should convert legacy cache items', 1, function() {
+  asyncTest('should use cachekey option', 2, function() {
+    var success = 0;
+    var cacheKey = 'myCache';
+
+    function onSuccess() {
+      var cachItem = localStorage.getItem(cacheKey);
+      success++;
+      if(success === 2) {
+        equal(called, 1, 'should only make one ajax call');
+        equal(cachItem, JSON.stringify({boo:'yea'}), 'should store test data');
+        start();
+      }
+    }
     
-    equal(1, 1, 'should be chaninable');
+    doAjax(onSuccess, 2, cacheKey);
   });
 
-  test('should use cachekey option', 1, function() {
+  asyncTest('should respect isCacheValid option', 1, function() {
     
-    equal(1, 1, 'should be chaninable');
+    var success = 0;
+
+    function onSuccess() {
+      success++;
+      if(success === 2) {
+        equal(called, 2, 'should make 2 ajax calls');
+        start();
+      }
+    }
+    
+    doAjax(onSuccess, 2, undefined, function(){return false;});
   });
 
 
