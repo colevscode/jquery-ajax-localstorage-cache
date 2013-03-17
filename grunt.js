@@ -69,7 +69,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-wrap');
   grunt.loadNpmTasks('grunt-contrib-clean');
   // Default task.
-  grunt.registerTask('default', 'clean lint qunit concat wrap min');
+  grunt.registerTask('default', 'clean lint concat wrap qunit min');
   grunt.registerTask('test', 'clean lint concat wrap qunit');
 
 };
