@@ -82,6 +82,17 @@
     }
     return item;
   }
+
+  function withOptions(options, fn) {
+    var hourstl = options.cacheTTL || 5;
+    var originalCacheKey = options.url.replace( /jQuery.*/,'' ) + options.type.toUpperCase() + options.data;
+    var isLegacy = options.cacheKey != null;
+    var cacheKey= options.cacheKey || md5(originalCacheKey);
+    if(!isLegacy) {
+      convertLegacy(originalCacheKey);
+    }
+    fn(hourstl, cacheKey, originalCacheKey, isLegacy);
+  }
   
   $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 
@@ -90,63 +101,81 @@
       return undefined;
     }
 
-    var hourstl = options.cacheTTL || 5;
+    withOptions(options, function(hourstl, cacheKey, originalCacheKey, isLegacy) {
 
-    var originalCacheKey = options.url.replace( /jQuery.*/,'' ) + options.type + options.data;
-
-    var isLegacy = options.cacheKey != null;
-
-    var cacheKey= options.cacheKey || md5(originalCacheKey);
-
-    if(!isLegacy) {
-      convertLegacy(originalCacheKey);
-    }
-    
-    // isCacheValid is a function to validate cache
-    if ( options.isCacheValid &&  ! options.isCacheValid() ){
-      if(isLegacy) {
-        localStorage.removeItem( cacheKey );
-      } else {
-        localStorage.removeItem( PREFIX+cacheKey );
+      // isCacheValid is a function to validate cache
+      if ( options.isCacheValid &&  ! options.isCacheValid() ){
+        if(isLegacy) {
+          localStorage.removeItem( cacheKey );
+        } else {
+          localStorage.removeItem( PREFIX+cacheKey );
+        }
       }
-    }
 
-    var value = getItem( cacheKey, isLegacy);
-    if ( value ){
-      //In the cache? So get it, apply success callback & abort the XHR request
-      // parse back to JSON string if we can.
-      if (options.dataType && options.dataType.indexOf( 'json' ) !== 0 ) {
-        value = JSON.stringify( value );
-      } 
-      
-      options.success( value );
-      // Abort is broken on JQ 1.5 :(
-      jqXHR.abort();
-    } else {
-      //If it not in the cache, we change the success callback, just put data on localstorage and after that apply the initial callback
-      if ( options.success ) {
-        options.realsuccess = options.success;
-      }  
+      var value = getItem( cacheKey, isLegacy);
+      if ( value ){
+        //In the cache? So get it, apply success callback & abort the XHR request
+        // parse back to JSON string if we can.
+        if (options.dataType && options.dataType.indexOf( 'json' ) !== 0 ) {
+          value = JSON.stringify( value );
+        } 
+        
+        options.success( value );
+        // Abort is broken on JQ 1.5 :(
+        jqXHR.abort();
+      } else {
+        //If it not in the cache, we change the success callback, just put data on localstorage and after that apply the initial callback
+        if ( options.success ) {
+          options.realsuccess = options.success;
+        }  
 
-      options.success = function( data ) {
-        var strdata = data;
-        if (this.dataType && this.dataType.indexOf( 'json' ) === 0 ) {
-          strdata = JSON.stringify( data );
-        }
-
-        // Save the data to localStorage catching exceptions (possibly QUOTA_EXCEEDED_ERR)
-        savePayload(cacheKey, data, hourstl, isLegacy, function(e) {
-          if ( typeof options.cacheError === 'function' ) { 
-            options.cacheError( e, originalCacheKey, strdata ); 
+        options.success = function( data ) {
+          var strdata = data;
+          if ( this.dataType && this.dataType.indexOf( 'json' ) === 0 ) {
+            strdata = JSON.stringify( data );
           }
-        });
 
-        if ( options.realsuccess ) {
-          options.realsuccess( data );
-        }
-      };
-      
-    }
+          // Save the data to localStorage catching exceptions (possibly QUOTA_EXCEEDED_ERR)
+          savePayload(cacheKey, data, hourstl, isLegacy, function(e) {
+            if ( typeof options.cacheError === 'function' ) { 
+              options.cacheError( e, originalCacheKey, strdata ); 
+            }
+          });
+
+          if ( options.realsuccess ) {
+            options.realsuccess( data );
+          }
+        };
+        
+      }
+    });
+
   });
   
+  // allows cache entries to be prefilled, possibly server-side
+  $.ajaxLocalCacheSet = function( urlOrOptions, value ) {
+
+    // Cache it ?
+    if ( !Modernizr.localstorage ) {
+      return undefined;
+    }
+
+    var options = typeof urlOrOptions === 'object' ? urlOrOptions : {
+      url: urlOrOptions,
+      type: 'get'
+    };
+
+    if (typeof value !== undefined) {
+      options.value = value;
+    }
+
+    withOptions(options, function(hourstl, cacheKey, originalCacheKey, isLegacy) {
+      // Save the data to localStorage 
+      savePayload(cacheKey, options.value, hourstl, isLegacy, function(e) {
+        // raise exceptions immediately since this is not asynchronous
+        throw e;
+      });
+    });
+  };
+
 } (this, this.jQuery, this.Modernizr));
