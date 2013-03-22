@@ -1,7 +1,7 @@
 (function() {var md5; var define = function(f){md5=f();}; define.amd=true;
-/*! jquery-ajax-localstorage-cache is a plugin build for jQuery (>1.5.1) - v0.1.0 - 2012-11-06
+/*! jquery-ajax-localstorage-cache is a plugin build for jQuery (>1.5.1) - v0.1.0 - 2013-03-22
 * https://github.com/nectify/jquery-ajax-jstorage-cache
-* Copyright (c) 2012 Paul Irish; Licensed Apache 2 */
+* Copyright (c) 2013 Paul Irish; Licensed Apache 2 */
 
 /*
  * JavaScript MD5 1.0
@@ -395,7 +395,7 @@
     if ( value ){
       //In the cache? So get it, apply success callback & abort the XHR request
       // parse back to JSON string if we can.
-      if (options.dataType.indexOf( 'json' ) !== 0 ) {
+      if (options.dataType && options.dataType.indexOf( 'json' ) !== 0 ) {
         value = JSON.stringify( value );
       } 
       
@@ -410,7 +410,7 @@
 
       options.success = function( data ) {
         var strdata = data;
-        if ( this.dataType.indexOf( 'json' ) === 0 ) {
+        if (this.dataType && this.dataType.indexOf( 'json' ) === 0 ) {
           strdata = JSON.stringify( data );
         }
 

@@ -115,7 +115,7 @@
     if ( value ){
       //In the cache? So get it, apply success callback & abort the XHR request
       // parse back to JSON string if we can.
-      if (options.dataType.indexOf( 'json' ) !== 0 ) {
+      if (options.dataType && options.dataType.indexOf( 'json' ) !== 0 ) {
         value = JSON.stringify( value );
       } 
       
@@ -130,7 +130,7 @@
 
       options.success = function( data ) {
         var strdata = data;
-        if ( this.dataType.indexOf( 'json' ) === 0 ) {
+        if (this.dataType && this.dataType.indexOf( 'json' ) === 0 ) {
           strdata = JSON.stringify( data );
         }
 
